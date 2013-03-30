@@ -2,14 +2,20 @@ package br.com.caelum.agiletickets.controllers;
 
 import static br.com.caelum.vraptor.view.Results.status;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
 import br.com.caelum.agiletickets.domain.Agenda;
 import br.com.caelum.agiletickets.domain.DiretorioDeEstabelecimentos;
+import br.com.caelum.agiletickets.domain.Promocao;
 import br.com.caelum.agiletickets.models.Espetaculo;
+import br.com.caelum.agiletickets.models.Estabelecimento;
 import br.com.caelum.agiletickets.models.Periodicidade;
 import br.com.caelum.agiletickets.models.Sessao;
 import br.com.caelum.vraptor.Get;
@@ -26,25 +32,30 @@ import com.google.common.base.Strings;
 public class EspetaculosController {
 
 	private final Agenda agenda;
-	private Validator validator;
-	private Result result;
+	private final Validator validator;
+	private final Result result;
+	private Estabelecimento estabelecimento;
 
 	private final DiretorioDeEstabelecimentos estabelecimentos;
 
-	public EspetaculosController(Agenda agenda, DiretorioDeEstabelecimentos estabelecimentos, Validator validator, Result result) {
+	public EspetaculosController(Agenda agenda,
+			DiretorioDeEstabelecimentos estabelecimentos, Validator validator,
+			Result result) {
 		this.agenda = agenda;
 		this.estabelecimentos = estabelecimentos;
 		this.validator = validator;
 		this.result = result;
 	}
 
-	@Get @Path("/espetaculos")
+	@Get
+	@Path("/espetaculos")
 	public List<Espetaculo> lista() {
 		result.include("estabelecimentos", estabelecimentos.todos());
 		return agenda.espetaculos();
 	}
 
-	@Post @Path("/espetaculos")
+	@Post
+	@Path("/espetaculos")
 	public void adiciona(Espetaculo espetaculo) {
 		
 		validaEspetaculo(espetaculo);
@@ -58,16 +69,18 @@ public class EspetaculosController {
 		// se nao tiver nome, avisa o usuario
 		// se nao tiver descricao, avisa o usuario
 		if (Strings.isNullOrEmpty(espetaculo.getNome())) {
-			validator.add(new ValidationMessage("Nome do espetáculo nao pode estar em branco", ""));
+			validator.add(new ValidationMessage(
+					"Nome do espetaculo nao pode estar em branco", ""));
 		}
 		if (Strings.isNullOrEmpty(espetaculo.getDescricao())) {
-			validator.add(new ValidationMessage("Descricao do espetaculo nao pode estar em branco", ""));
+			validator.add(new ValidationMessage(
+					"Descricao do espetaculo nao pode estar em branco", ""));
 		}
 		validator.onErrorRedirectTo(this).lista();
 	}
 
-
-	@Get @Path("/sessao/{id}")
+	@Get
+	@Path("/sessao/{id}")
 	public void sessao(Long id) {
 		Sessao sessao = getSessao(id);
 
@@ -98,11 +111,13 @@ public class EspetaculosController {
 		validarSessao(sessao);
 
 		if (quantidade < 1) {
-			validator.add(new ValidationMessage("Voce deve escolher um lugar ou mais", ""));
+			validator.add(new ValidationMessage(
+					"Voce deve escolher um lugar ou mais", ""));
 		}
 
 		if (!sessao.podeReservar(quantidade)) {
-			validator.add(new ValidationMessage("Nao existem ingressos dispon√≠veis", ""));
+			validator.add(new ValidationMessage(
+					"Nao existem ingressos disponiveis", ""));
 		}
 
 		// em caso de erro, redireciona para a lista de sessao
@@ -116,16 +131,18 @@ public class EspetaculosController {
 		}
 	}
 
-	@Get @Path("/espetaculo/{espetaculoId}/sessoes")
+	@Get
+	@Path("/espetaculo/{espetaculoId}/sessoes")
 	public void sessoes(Long espetaculoId) {
 		Espetaculo espetaculo = carregaEspetaculo(espetaculoId);
 
 		result.include("espetaculo", espetaculo);
 	}
 
-
-	@Post @Path("/espetaculo/{espetaculoId}/sessoes")
-	public void cadastraSessoes(Long espetaculoId, LocalDate inicio, LocalDate fim, LocalTime horario, Periodicidade periodicidade) {
+	@Post
+	@Path("/espetaculo/{espetaculoId}/sessoes")
+	public void cadastraSessoes(Long espetaculoId, LocalDate inicio,
+			LocalDate fim, LocalTime horario, Periodicidade periodicidade) {
 		Espetaculo espetaculo = carregaEspetaculo(espetaculoId);
 
 		criarSessaoPorPeriodo(inicio, fim, horario, periodicidade, espetaculo);
@@ -142,6 +159,33 @@ public class EspetaculosController {
 		agenda.agende(sessoes);
 		
 		result.include("message", sessoes.size() + " sessoes criadas com sucesso");
+
+	}
+
+	@Get
+	@Path("/asdsdfg")
+	public void promocoesDisponiveisParaEspetaculo() {
+
+		List<Promocao> todasPromocoes = new ArrayList<Promocao>();
+		Espetaculo espetaculo = new Espetaculo();
+
+		Map<Promocao, List<Sessao>> sessoesPromocionais = new HashMap<Promocao, List<Sessao>>();
+
+		for (Promocao promocao : todasPromocoes) {
+			for (Sessao s : espetaculo.getSessoes()) {
+				if (promocao.isSempre()	|| s.getIngressosDisponiveis() <= s.getTotalIngressos() * 0.1) {
+					if (s.getInicio().isAfter(promocao.getInicio())
+							&& s.getInicio().isBefore(promocao.getFim())) {
+						if (sessoesPromocionais.containsKey(promocao)) {
+							sessoesPromocionais.get(promocao).add(s);
+						} else {
+							sessoesPromocionais.put(promocao,
+									new ArrayList<Sessao>(Arrays.asList(s)));
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private Espetaculo carregaEspetaculo(Long espetaculoId) {
