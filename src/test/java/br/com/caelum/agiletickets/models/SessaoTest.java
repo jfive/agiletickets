@@ -1,11 +1,27 @@
 package br.com.caelum.agiletickets.models;
 
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
+
+import br.com.caelum.agiletickets.domain.Promocao;
+import br.com.caelum.agiletickets.util.Util;
 
 public class SessaoTest {
 
 
+	@Test
+	public void verificaPromocaoValida() {
+		Sessao sessao = new Sessao();
+		sessao.setInicio(new DateTime());
+
+		Promocao promocao = new Promocao();
+		promocao.setInicio(new DateTime().minusHours(1));
+		promocao.setFim(new DateTime().plusHours(1));
+
+		Assert.assertTrue(sessao.dentroDoIntervalo(promocao));
+	}
+	
 	@Test
 	public void deveVender1ingressoSeHa2vagas() throws Exception {
 		Sessao sessao = new Sessao();

@@ -10,19 +10,6 @@ import br.com.caelum.agiletickets.models.Sessao;
 public class UtilTest {
 
 	@Test
-	public void verificaPromocaoValida() {
-		Sessao sessao = new Sessao();
-		sessao.setInicio(new DateTime());
-
-		Promocao promocao = new Promocao();
-		promocao.setInicio(new DateTime().minusHours(1));
-		promocao.setFim(new DateTime().plusHours(1));
-
-		Util util = new Util();
-		Assert.assertTrue(util.dentroDoIntervalo(sessao, promocao));
-	}
-
-	@Test
 	public void verificaPromocaoPassadaInvalida() {
 		Sessao sessao = new Sessao();
 		sessao.setInicio(new DateTime());
@@ -32,7 +19,7 @@ public class UtilTest {
 		promocao.setFim(new DateTime().minusMinutes(1));
 
 		Util util = new Util();
-		Assert.assertFalse(util.dentroDoIntervalo(sessao, promocao));
+		Assert.assertFalse(sessao.dentroDoIntervalo(promocao));
 	}
 
 	@Test
@@ -45,7 +32,7 @@ public class UtilTest {
 		promocao.setFim(new DateTime().plusHours(1));
 
 		Util util = new Util();
-		Assert.assertFalse(util.dentroDoIntervalo(sessao, promocao));
+		Assert.assertFalse(sessao.dentroDoIntervalo(promocao));
 	}
 
 	@Test

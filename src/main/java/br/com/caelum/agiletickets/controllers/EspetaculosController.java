@@ -174,8 +174,7 @@ public class EspetaculosController {
 		for (Promocao promocao : todasPromocoes) {
 			for (Sessao s : espetaculo.getSessoes()) {
 				if (promocao.isSempre()	|| s.getIngressosDisponiveis() <= s.getTotalIngressos() * 0.1) {
-					if (s.getInicio().isAfter(promocao.getInicio())
-							&& s.getInicio().isBefore(promocao.getFim())) {
+					if (s.dentroDoIntervalo(promocao)) {
 						if (sessoesPromocionais.containsKey(promocao)) {
 							sessoesPromocionais.get(promocao).add(s);
 						} else {
