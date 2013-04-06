@@ -69,6 +69,9 @@
 			<batchtest fork="yes" todir="${output.dir}/test-results">
 				<fileset dir="${test.src.dir}">
 					<include name="**/*Test.java" />
+                    <exclude name="**/EstabelecimentoTest.java" />
+                    <exclude name="**/DaoTest.java" />
+                    <exclude name="**/CarrinhoTest.java" />
 				</fileset>
 			</batchtest>
 			<formatter type="brief" usefile="false" />
