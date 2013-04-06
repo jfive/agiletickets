@@ -20,7 +20,7 @@ public class ExtratoraTest {
     public void calculaValorTest() {
 
         HttpServletRequest rq = Mockito.mock(HttpServletRequest.class);
-        Mockito.when(rq.getParameter("preco")).thenReturn("30");
+        Mockito.when(rq.getParameter("preco")).thenReturn("40");
         Mockito.when(rq.getParameter("quantidade")).thenReturn("5");
         Extratora e = new Extratora(rq);
 
